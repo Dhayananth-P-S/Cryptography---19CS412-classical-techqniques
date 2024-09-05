@@ -618,53 +618,106 @@ In the rail fence cipher, the plaintext is written downwards and diagonally on s
 #include <stdio.h>
 #include <string.h>
 
-int main() {
-    int i, j, len, rails, count, dir;
-    char str[1000];
-    int code[100][1000] = {0};  // Initialize the entire array to 0
+#define MAX_LEN 1000
+#define MAX_RAILS 100
 
-    printf("Enter a Secret Message:\n");
-    gets(str);  
-    len = strlen(str);
-
-    printf("Enter number of rails:\n");
-    scanf("%d", &rails);
-
-    count = 0;
-    i = 0;
-    dir = 1;  
+void encryptRailFence(char *str, int rails, char *encrypted) {
+    int len = strlen(str);
+    int code[MAX_RAILS][MAX_LEN] = {0};  // Initialize the entire array to 0
+    int i = 0, j, dir = 1;
 
     for (j = 0; j < len; j++) {
         code[i][j] = str[j];
-        
-        // Change direction if we reach the top or bottom rail
         if (i == 0) {
             dir = 1;
         } else if (i == rails - 1) {
             dir = -1;
         }
-
         i += dir;
     }
 
-    printf("Encrypted Message:\n");
-
-    // Print the encrypted message
+    int index = 0;
     for (i = 0; i < rails; i++) {
         for (j = 0; j < len; j++) {
             if (code[i][j] != 0) {
-                printf("%c", code[i][j]);
+                encrypted[index++] = code[i][j];
+            }
+        }
+    }
+    encrypted[index] = '\0';
+}
+
+void decryptRailFence(char *encrypted, int rails, char *decrypted) {
+    int len = strlen(encrypted);
+    int code[MAX_RAILS][MAX_LEN] = {0};  // Initialize the entire array to 0
+    int i = 0, j, dir = 1;
+
+    // Step 1: Mark the positions where characters will be placed
+    for (j = 0; j < len; j++) {
+        code[i][j] = 1; // Mark the positions
+        if (i == 0) {
+            dir = 1;
+        } else if (i == rails - 1) {
+            dir = -1;
+        }
+        i += dir;
+    }
+
+    // Step 2: Fill the code array with the encrypted characters
+    int index = 0;
+    for (i = 0; i < rails; i++) {
+        for (j = 0; j < len; j++) {
+            if (code[i][j] == 1) {
+                code[i][j] = encrypted[index++];
             }
         }
     }
 
-    printf("\n");
+    // Step 3: Reconstruct the original message from the code array
+    i = 0;
+    j = 0;
+    dir = 1;
+    index = 0;
+    while (index < len) {
+        if (code[i][j] != 0) {
+            decrypted[index++] = code[i][j];
+        }
+        j++;
+        if (i == 0) {
+            dir = 1;
+        } else if (i == rails - 1) {
+            dir = -1;
+        }
+        i += dir;
+    }
+    decrypted[index] = '\0';
+}
+
+int main() {
+    char str[MAX_LEN], encrypted[MAX_LEN], decrypted[MAX_LEN];
+    int rails;
+
+    printf("Enter a Secret Message:\n");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = 0;  // Remove the newline character
+
+    printf("Enter number of rails:\n");
+    scanf("%d", &rails);
+
+    encryptRailFence(str, rails, encrypted);
+    printf("Encrypted Message:\n%s\n", encrypted);
+
+    decryptRailFence(encrypted, rails, decrypted);
+    printf("Decrypted Message:\n%s\n", decrypted);
+
     return 0;
 }
 
 ```
 ## OUTPUT:
-![Screenshot 2024-09-02 215208](https://github.com/user-attachments/assets/c402bb28-905c-434c-b51a-04f160d405f4)
+![Screenshot 2024-09-05 085332](https://github.com/user-attachments/assets/4c528c9a-9505-416e-a943-9086f753d333)
+
+
 
 ## RESULT:
 The program is executed successfully
